@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('二要素認証設定')}"></head>
+<body>
+  <nav th:replace="~{fragments/common :: navbar}"></nav>
+
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6">
+        <div class="card border-0 shadow">
+          <div class="card-body p-5">
+            <div class="text-center mb-4">
+              <div class="bg-warning bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                   style="width: 70px; height: 70px;">
+                <i class="bi bi-phone-fill text-white fs-2"></i>
+              </div>
+              <h1 class="h3 mb-1 fw-bold">二要素認証の設定</h1>
+              <p class="text-muted">アカウントのセキュリティを強化します</p>
+            </div>
+            
+            <!-- エラーメッセージ -->
+            <div th:if="${error}" class="alert alert-danger d-flex align-items-center" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <div th:text="${error}"></div>
+            </div>
+            
+            <!-- ステップ1: QRコード -->
+            <div class="mb-4">
+              <h5 class="fw-semibold mb-3">
+                <span class="badge bg-primary rounded-circle me-2">1</span>
+                認証アプリでQRコードをスキャン
+              </h5>
+              <p class="text-muted small">
+                Google Authenticator、Microsoft Authenticator、Authyなどの認証アプリを使用してください。
+              </p>
+              <div class="text-center mb-3">
+                <img th:src="'data:image/png;base64,' + ${qrCode}" alt="QR Code" class="img-fluid border rounded p-2">
+              </div>
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>QRコードが読み取れない場合：</strong><br>
+                手動でキーを入力してください：
+                <div class="mt-2">
+                  <code class="user-select-all" th:text="${secret}"></code>
+                  <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="copySecret()">
+                    <i class="bi bi-clipboard"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- ステップ2: 検証 -->
+            <form th:action="@{/mfa/enable}" method="post">
+              <input type="hidden" name="secret" th:value="${secret}">
+              
+              <div class="mb-4">
+                <h5 class="fw-semibold mb-3">
+                  <span class="badge bg-primary rounded-circle me-2">2</span>
+                  認証コードを入力
+                </h5>
+                <p class="text-muted small">
+                  認証アプリに表示されている6桁のコードを入力してください。
+                </p>
+                <div class="mb-3">
+                  <label for="code" class="form-label">認証コード</label>
+                  <input type="text" class="form-control form-control-lg text-center" id="code" name="code" 
+                         pattern="[0-9]{6}" maxlength="6" placeholder="000000" required autofocus>
+                </div>
+              </div>
+              
+              <!-- ステップ3: パスワード確認 -->
+              <div class="mb-4">
+                <h5 class="fw-semibold mb-3">
+                  <span class="badge bg-primary rounded-circle me-2">3</span>
+                  パスワードを確認
+                </h5>
+                <div class="mb-3">
+                  <label for="password" class="form-label">現在のパスワード</label>
+                  <input type="password" class="form-control" id="password" name="password" 
+                         placeholder="パスワードを入力" required>
+                </div>
+              </div>
+              
+              <div class="d-grid">
+                <button type="submit" class="btn btn-warning btn-lg fw-semibold">
+                  <i class="bi bi-shield-check me-2"></i>二要素認証を有効化
+                </button>
+              </div>
+            </form>
+            
+            <div class="alert alert-warning mt-4 mb-0">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <strong>重要：</strong>
+              有効化後、バックアップコードが表示されます。必ず安全な場所に保管してください。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div th:replace="~{fragments/common :: scripts}"></div>
+  <script>
+    // シークレットキーのコピー
+    function copySecret() {
+      const secret = document.querySelector('code').textContent;
+      navigator.clipboard.writeText(secret).then(() => {
+        alert('シークレットキーをコピーしました');
+      });
+    }
+    
+    // 6桁の数字のみ入力可能にする
+    document.getElementById('code').addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+    });
+  </script>
+</body>
+</html>

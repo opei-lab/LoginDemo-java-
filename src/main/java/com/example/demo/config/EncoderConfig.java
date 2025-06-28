@@ -1,17 +1,24 @@
-// src/main/java/com/example/demo/config/EncoderConfig.java
 package com.example.demo.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.example.demo.security.PepperedPasswordEncoder;
+
+/**
+ * パスワードエンコーダー設定
+ * ペッパー付きBCryptエンコーダーを提供
+ */
 @Configuration
 public class EncoderConfig {
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    @Primary
+    public PasswordEncoder passwordEncoder(PepperedPasswordEncoder pepperedPasswordEncoder) {
+        // PepperedPasswordEncoderを使用
+        return pepperedPasswordEncoder;
     }
 
 }

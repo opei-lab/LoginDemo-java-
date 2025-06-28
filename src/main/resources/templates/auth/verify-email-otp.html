@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('メール認証')}"></head>
+<body>
+  <nav th:replace="~{fragments/common :: navbar}"></nav>
+
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-6 col-lg-5">
+        <div class="card border-0 shadow">
+          <div class="card-body p-5">
+            <div class="text-center mb-4">
+              <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                   style="width: 70px; height: 70px;">
+                <i class="bi bi-envelope-open text-white fs-2"></i>
+              </div>
+              <h1 class="h3 mb-1 fw-bold">メール認証</h1>
+              <p class="text-muted">メールで送信された認証コードを入力してください</p>
+            </div>
+            
+            <!-- メッセージ -->
+            <div th:if="${success}" class="alert alert-success d-flex align-items-center" role="alert">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              <div th:text="${success}"></div>
+            </div>
+            
+            <div th:if="${error}" class="alert alert-danger d-flex align-items-center" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <div th:text="${error}"></div>
+            </div>
+            
+            <!-- OTP入力フォーム -->
+            <form th:action="@{/auth/verify-additional}" method="post">
+              <input type="hidden" name="verificationType" value="EMAIL_OTP">
+              
+              <div class="mb-4">
+                <label for="otpCode" class="form-label">認証コード</label>
+                <input type="text" class="form-control form-control-lg text-center" 
+                       id="otpCode" name="code" pattern="[0-9]{6}" maxlength="6" 
+                       placeholder="000000" required autofocus>
+                <div class="form-text">6桁の認証コードを入力してください</div>
+              </div>
+              
+              <!-- このデバイスを信頼 -->
+              <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" id="trustDevice" name="trustDevice" value="true">
+                <label class="form-check-label" for="trustDevice">
+                  このデバイスを30日間信頼する
+                </label>
+              </div>
+              
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">
+                  <i class="bi bi-shield-check me-2"></i>認証
+                </button>
+              </div>
+            </form>
+            
+            <!-- 再送信 -->
+            <div class="text-center mt-4">
+              <p class="text-muted small">認証コードが届かない場合は</p>
+              <form th:action="@{/auth/send-email-otp}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-link">
+                  <i class="bi bi-arrow-clockwise me-1"></i>再送信
+                </button>
+              </form>
+            </div>
+            
+            <!-- 別の方法 -->
+            <div class="text-center mt-3">
+              <a th:href="@{/auth/additional-verification}" class="btn btn-link">
+                <i class="bi bi-arrow-left me-1"></i>別の認証方法を選択
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <!-- ヘルプ情報 -->
+        <div class="alert alert-info mt-4">
+          <h6 class="alert-heading">
+            <i class="bi bi-info-circle me-2"></i>ヘルプ
+          </h6>
+          <ul class="mb-0 small">
+            <li>認証コードは10分間有効です</li>
+            <li>迷惑メールフォルダもご確認ください</li>
+            <li>登録されたメールアドレスに送信されます</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div th:replace="~{fragments/common :: scripts}"></div>
+  <script>
+    // 6桁の数字のみ入力可能にする
+    document.getElementById('otpCode').addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+    });
+    
+    // 自動フォーカス
+    window.addEventListener('load', function() {
+      document.getElementById('otpCode').focus();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+/* 認証画面用のカスタムスタイル */
+
+/* グラデーション背景 */
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    background-attachment: fixed;
+}
+
+/* カードのカスタマイズ */
+.card {
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    transition: transform 0.3s ease;
+}
+
+/* 入力フィールドのカスタマイズ */
+.input-group-text {
+    background-color: #f8f9fa;
+    border-right: none;
+    transition: all 0.3s ease;
+}
+
+.form-control {
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: #6366f1;
+}
+
+/* ホバー時の統一感のあるエフェクト */
+.input-group:hover .input-group-text {
+    border-color: #6366f1;
+    background-color: #e5e7ff;
+}
+
+.input-group:hover .form-control {
+    border-color: #6366f1;
+}
+
+.input-group:hover .btn-outline-secondary {
+    border-color: #6366f1;
+}
+
+/* フォーカス時の統一感のあるエフェクト */
+.input-group:focus-within .input-group-text {
+    border-color: #6366f1;
+    background-color: #e5e7ff;
+}
+
+.input-group:focus-within .form-control {
+    border-color: #6366f1;
+}
+
+.input-group:focus-within .btn-outline-secondary {
+    border-color: #6366f1;
+}
+
+/* パスワード表示ボタンの境界線修正 */
+.input-group .btn-outline-secondary {
+    border-color: #dee2e6;
+}
+
+.input-group .btn-outline-secondary:hover {
+    border-color: #6366f1;
+    background-color: #f8f9fa;
+}
+
+/* ボタンのホバーエフェクト */
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+/* アラートのアニメーション */
+.alert {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 分割線 */
+.divider {
+    position: relative;
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #e5e7eb;
+}
+
+.divider-text {
+    background: white;
+    padding: 0 1rem;
+    position: relative;
+}
+
+/* パスワード強度インジケーターのカスタマイズ */
+.progress {
+    background-color: #e5e7eb;
+}
+
+/* リンクのカスタマイズ */
+a {
+    transition: all 0.3s ease;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+/* チェックボックスとリンクの高さ調整 */
+.form-check-label {
+    line-height: 1.5;
+}
+
+/* レスポンシブ調整 */
+@media (max-width: 576px) {
+    .card-body {
+        padding: 2rem !important;
+    }
+    
+    /* モバイルでは縦並びに */
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .form-check {
+        margin-bottom: 0 !important;
+    }
+}

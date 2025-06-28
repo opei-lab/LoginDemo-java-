@@ -1,0 +1,30 @@
+# ローカル環境用の設定例
+# このファイルをコピーして application-local.properties を作成し、実際の値を入力してください
+# application-local.properties は .gitignore に含まれているため、Gitにコミットされません
+
+# メール設定（Gmail の例）
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your-email@gmail.com
+spring.mail.password=your-app-password  # Googleアカウントの「アプリパスワード」を使用
+
+# メール設定（Outlook の例）
+# spring.mail.host=smtp-mail.outlook.com
+# spring.mail.port=587
+# spring.mail.username=your-email@outlook.com
+# spring.mail.password=your-password
+
+# メール設定（Yahoo の例）
+# spring.mail.host=smtp.mail.yahoo.com
+# spring.mail.port=587
+# spring.mail.username=your-email@yahoo.com
+# spring.mail.password=your-app-password
+
+# データベース設定（本番環境用）
+# spring.datasource.url=jdbc:postgresql://localhost:5432/logindb
+# spring.datasource.username=dbuser
+# spring.datasource.password=dbpassword
+
+# セキュリティ設定（本番環境では必ず変更）
+app.security.pepper=your-very-secret-pepper-value-here
+app.security.jwt.secret=your-very-secret-jwt-key-here

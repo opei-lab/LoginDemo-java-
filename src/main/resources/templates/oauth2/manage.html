@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('ソーシャル連携管理')}"></head>
+<body>
+  <nav th:replace="~{fragments/common :: navbar}"></nav>
+
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8">
+        <div class="card border-0 shadow">
+          <div class="card-body p-5">
+            <div class="text-center mb-4">
+              <div class="bg-info bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                   style="width: 70px; height: 70px;">
+                <i class="bi bi-link-45deg text-white fs-2"></i>
+              </div>
+              <h1 class="h3 mb-1 fw-bold">ソーシャル連携管理</h1>
+              <p class="text-muted">外部サービスとのアカウント連携を管理します</p>
+            </div>
+            
+            <!-- メッセージ -->
+            <div th:if="${success}" class="alert alert-success d-flex align-items-center" role="alert">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              <div th:text="${success}"></div>
+            </div>
+            
+            <div th:if="${error}" class="alert alert-danger d-flex align-items-center" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <div th:text="${error}"></div>
+            </div>
+            
+            <!-- 連携済みプロバイダー -->
+            <div class="mb-5">
+              <h5 class="fw-semibold mb-3">
+                <i class="bi bi-check2-circle me-2"></i>連携済みサービス
+              </h5>
+              
+              <div th:if="${#lists.isEmpty(links)}" class="text-muted text-center py-4">
+                まだ外部サービスとの連携はありません
+              </div>
+              
+              <div th:each="link : ${links}" class="border rounded p-3 mb-3">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center">
+                    <div class="me-3">
+                      <i th:class="${'bi bi-' + (link.provider == 'google' ? 'google' : 
+                                                link.provider == 'github' ? 'github' : 
+                                                'microsoft') + ' fs-3'}"></i>
+                    </div>
+                    <div>
+                      <h6 class="mb-1" th:text="${#strings.capitalize(link.provider)}"></h6>
+                      <p class="text-muted small mb-0">
+                        <span th:text="${link.providerEmail}"></span><br>
+                        連携日: <span th:text="${#temporals.format(link.linkedAt, 'yyyy年MM月dd日')}"></span>
+                      </p>
+                    </div>
+                  </div>
+                  <div>
+                    <form th:action="@{/oauth2/unlink/{id}(id=${link.id})}" method="post" 
+                          onsubmit="return confirm('本当に連携を解除しますか？');">
+                      <button type="submit" class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-unlink me-1"></i>連携解除
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 利用可能なプロバイダー -->
+            <div>
+              <h5 class="fw-semibold mb-3">
+                <i class="bi bi-plus-circle me-2"></i>新しい連携を追加
+              </h5>
+              
+              <div class="row g-3">
+                <!-- Google -->
+                <div class="col-12 col-md-4">
+                  <div class="text-center">
+                    <a th:href="@{/oauth2/link/google}" 
+                       th:if="${!#lists.contains(links.![provider], 'google')}"
+                       class="btn btn-outline-primary w-100 py-3">
+                      <i class="bi bi-google fs-4 d-block mb-2"></i>
+                      Google
+                    </a>
+                    <div th:if="${#lists.contains(links.![provider], 'google')}" 
+                         class="btn btn-secondary w-100 py-3 disabled">
+                      <i class="bi bi-google fs-4 d-block mb-2"></i>
+                      連携済み
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- GitHub -->
+                <div class="col-12 col-md-4">
+                  <div class="text-center">
+                    <a th:href="@{/oauth2/link/github}" 
+                       th:if="${!#lists.contains(links.![provider], 'github')}"
+                       class="btn btn-outline-dark w-100 py-3">
+                      <i class="bi bi-github fs-4 d-block mb-2"></i>
+                      GitHub
+                    </a>
+                    <div th:if="${#lists.contains(links.![provider], 'github')}" 
+                         class="btn btn-secondary w-100 py-3 disabled">
+                      <i class="bi bi-github fs-4 d-block mb-2"></i>
+                      連携済み
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Microsoft -->
+                <div class="col-12 col-md-4">
+                  <div class="text-center">
+                    <a th:href="@{/oauth2/link/microsoft}" 
+                       th:if="${!#lists.contains(links.![provider], 'microsoft')}"
+                       class="btn btn-outline-info w-100 py-3">
+                      <i class="bi bi-microsoft fs-4 d-block mb-2"></i>
+                      Microsoft
+                    </a>
+                    <div th:if="${#lists.contains(links.![provider], 'microsoft')}" 
+                         class="btn btn-secondary w-100 py-3 disabled">
+                      <i class="bi bi-microsoft fs-4 d-block mb-2"></i>
+                      連携済み
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 注意事項 -->
+            <div class="alert alert-info mt-4">
+              <h6 class="alert-heading">
+                <i class="bi bi-info-circle me-2"></i>ソーシャル連携について
+              </h6>
+              <ul class="mb-0 small">
+                <li>連携したサービスのアカウントでログインできるようになります</li>
+                <li>パスワードを忘れた場合の代替ログイン手段として利用できます</li>
+                <li>連携を解除してもアカウント自体は削除されません</li>
+                <li>プライバシーポリシーに基づき、最小限の情報のみを取得します</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div th:replace="~{fragments/common :: scripts}"></div>
+</body>
+</html>

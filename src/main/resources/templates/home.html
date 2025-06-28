@@ -1,15 +1,134 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-	<title>Home</title>
-	<link rel="stylesheet" th:href="@{/css/style.css}" />
-</head>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/common :: head('ホーム')}"></head>
 <body>
-<h1>Welcome!</h1>
-<form th:action="@{/logout}" method="post">
-  <!-- CSRF トークンを挿入 -->
-  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-  <button type="submit">Logout</button>
-</form>
+  <nav th:replace="~{fragments/common :: navbar}"></nav>
+
+  <div class="container py-5">
+    <div class="row">
+      <div class="col-12">
+        <div class="card border-0 shadow mb-4">
+          <div class="card-body p-5 text-center">
+            <h1 class="display-4 fw-bold mb-3">
+              <i class="bi bi-house-heart-fill text-primary me-3"></i>
+              ようこそ！
+            </h1>
+            <p class="lead text-muted">
+              セキュアログインデモへようこそ。<br>
+              あなたのアカウントは高度なセキュリティ機能で保護されています。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- アカウント情報 -->
+      <div class="col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">
+              <i class="bi bi-person-badge text-primary me-2"></i>
+              アカウント情報
+            </h5>
+            <div class="mt-3">
+              <p class="mb-2">
+                <strong>ユーザー名：</strong>
+                <span sec:authentication="name">ユーザー名</span>
+              </p>
+              <p class="mb-2">
+                <strong>ロール：</strong>
+                <span class="badge bg-secondary">USER</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- セキュリティ設定 -->
+      <div class="col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">
+              <i class="bi bi-shield-check text-success me-2"></i>
+              セキュリティ設定
+            </h5>
+            <div class="mt-3">
+              <div class="d-grid gap-2">
+                <a th:if="${!user.mfaEnabled}" th:href="@{/mfa/setup}" class="btn btn-outline-primary">
+                  <i class="bi bi-phone me-2"></i>
+                  二要素認証を有効化
+                </a>
+                <a th:if="${user.mfaEnabled}" th:href="@{/mfa/manage}" class="btn btn-success">
+                  <i class="bi bi-shield-check me-2"></i>
+                  二要素認証設定（有効）
+                </a>
+                <a th:href="@{/change-password}" class="btn btn-outline-secondary">
+                  <i class="bi bi-key me-2"></i>
+                  パスワード変更
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- セキュリティ機能 -->
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">
+              <i class="bi bi-shield-fill-check text-info me-2"></i>
+              実装済みセキュリティ機能
+            </h5>
+            <div class="row g-3 mt-2">
+              <div class="col-md-6">
+                <ul class="list-unstyled">
+                  <li class="mb-2">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    強力なパスワードポリシー
+                  </li>
+                  <li class="mb-2">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    パスワード履歴管理
+                  </li>
+                  <li class="mb-2">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    ペッパー + ソルト暗号化
+                  </li>
+                  <li class="mb-2">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    アカウントロック機能
+                  </li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <ul class="list-unstyled">
+                  <li class="mb-2">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    監査ログシステム
+                  </li>
+                  <li class="mb-2">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    二要素認証（TOTP）
+                  </li>
+                  <li class="mb-2">
+                    <i class="bi bi-clock-history text-warning me-2"></i>
+                    ワンタイムパスワード（準備中）
+                  </li>
+                  <li class="mb-2">
+                    <i class="bi bi-clock-history text-warning me-2"></i>
+                    リスクベース認証（準備中）
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div th:replace="~{fragments/common :: scripts}"></div>
 </body>
 </html>

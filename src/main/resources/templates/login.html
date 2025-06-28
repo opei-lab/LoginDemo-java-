@@ -1,27 +1,165 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <title>Login</title>
-  <link rel="stylesheet" th:href="@{/css/style.css}" />
-</head>
+<head th:replace="~{fragments/common :: head('ログイン')}"></head>
 <body>
-  <div class="container">
-    <h2>ログイン</h2>
-    <!-- エラーメッセージの表示 -->
-    <div th:if="${param.error}" class="error-message">
-      ユーザー名またはパスワードが正しくありません。
-    </div>
-    <div th:if="${param.logout}" class="success-message">
-      ログアウトしました。
-    </div>
-    <form th:action="@{/login}" method="post">
-      <input type="text" name="username" placeholder="ユーザー名" required/>
-      <input type="password" name="password" placeholder="パスワード" required/>
-      <button type="submit">ログイン</button>
-    </form>
-    <div class="register-link">
-      <p>アカウントをお持ちでない方は<a th:href="@{/register}">こちら</a>から新規登録してください。</p>
+  <div class="container d-flex align-items-center justify-content-center py-5" style="min-height: 100vh;">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+      <div class="card border-0 shadow-lg">
+        <div class="card-body p-5">
+          <!-- ロゴ・タイトル -->
+          <div class="text-center mb-4">
+            <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                 style="width: 70px; height: 70px;">
+              <i class="bi bi-shield-lock-fill text-white fs-2"></i>
+            </div>
+            <h1 class="h3 mb-1 fw-bold">おかえりなさい</h1>
+            <p class="text-muted small">アカウントにログインしてください</p>
+          </div>
+          
+          <!-- アラートメッセージ -->
+          <div th:if="${param.error}" class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div>
+              <div th:if="${session.SPRING_SECURITY_LAST_EXCEPTION?.message == 'アカウントがロックされています'}">
+                アカウントがロックされています。30分後に再度お試しください。
+              </div>
+              <div th:unless="${session.SPRING_SECURITY_LAST_EXCEPTION?.message == 'アカウントがロックされています'}">
+                ユーザー名またはパスワードが正しくありません。
+              </div>
+            </div>
+          </div>
+          
+          <div th:if="${param.registered}" class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <div>アカウントが作成されました！ログインしてください。</div>
+          </div>
+          
+          <div th:if="${param.logout}" class="alert alert-info d-flex align-items-center" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            <div>ログアウトしました。またのご利用をお待ちしています。</div>
+          </div>
+          
+          <div th:if="${param.oauth2error}" class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div th:text="${session.oauth2Error != null ? session.oauth2Error : 'ソーシャルログインに失敗しました'}"></div>
+          </div>
+          
+          <!-- ログインフォーム -->
+          <form th:action="@{/login}" method="post">
+            <div class="mb-3">
+              <label for="username" class="form-label fw-semibold">
+                <i class="bi bi-person me-1"></i>ユーザー名
+              </label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0">
+                  <i class="bi bi-person text-muted"></i>
+                </span>
+                <input type="text" class="form-control border-start-0 ps-0" id="username" name="username" 
+                       placeholder="ユーザー名を入力" required autofocus>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <label for="password" class="form-label fw-semibold">
+                <i class="bi bi-key me-1"></i>パスワード
+              </label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0">
+                  <i class="bi bi-lock text-muted"></i>
+                </span>
+                <input type="password" class="form-control border-start-0 border-end-0 ps-0" id="password" name="password" 
+                       placeholder="パスワードを入力" required>
+                <button class="btn btn-outline-secondary border-start-0" type="button" id="togglePassword">
+                  <i class="bi bi-eye" id="toggleIcon"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="rememberMe" name="remember-me">
+                <label class="form-check-label" for="rememberMe">
+                  ログイン状態を保持
+                </label>
+              </div>
+              <a href="#" class="text-decoration-none">パスワードを忘れた方</a>
+            </div>
+            
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                <i class="bi bi-box-arrow-in-right me-2"></i>ログイン
+              </button>
+            </div>
+          </form>
+          
+          <div class="divider my-4">
+            <span class="divider-text px-3 bg-white text-muted small">または</span>
+          </div>
+          
+          <!-- その他のログイン方法 -->
+          <div class="d-grid gap-2">
+            <a th:href="@{/auth/otp/login}" class="btn btn-outline-primary">
+              <i class="bi bi-envelope me-2"></i>メールでワンタイムパスワードを受け取る
+            </a>
+          </div>
+          
+          <!-- ソーシャルログイン -->
+          <div class="social-login mt-3">
+            <p class="text-center text-muted small mb-3">ソーシャルアカウントでログイン</p>
+            <div class="d-flex gap-2">
+              <a th:href="@{/oauth2/authorization/google}" class="btn btn-outline-primary flex-fill">
+                <i class="bi bi-google"></i>
+                <span class="d-none d-sm-inline ms-1">Google</span>
+              </a>
+              <a th:href="@{/oauth2/authorization/github}" class="btn btn-outline-dark flex-fill">
+                <i class="bi bi-github"></i>
+                <span class="d-none d-sm-inline ms-1">GitHub</span>
+              </a>
+              <a th:href="@{/oauth2/authorization/microsoft}" class="btn btn-outline-info flex-fill">
+                <i class="bi bi-microsoft"></i>
+                <span class="d-none d-sm-inline ms-1">Microsoft</span>
+              </a>
+            </div>
+          </div>
+          
+          <hr class="my-4">
+          
+          <div class="text-center">
+            <p class="mb-0">アカウントをお持ちでない方は</p>
+            <a th:href="@{/register}" class="text-decoration-none fw-semibold">
+              新規アカウントを作成 <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- フッター -->
+      <div class="text-center mt-4">
+        <p class="text-muted small mb-0">
+          <i class="bi bi-shield-check me-1"></i>
+          あなたの情報は安全に保護されています
+        </p>
+      </div>
     </div>
   </div>
+  
+  <div th:replace="~{fragments/common :: scripts}"></div>
+  <!-- パスワード表示/非表示切り替え -->
+  <script>
+    document.getElementById('togglePassword').addEventListener('click', function() {
+      const passwordInput = document.getElementById('password');
+      const toggleIcon = document.getElementById('toggleIcon');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('bi-eye');
+        toggleIcon.classList.add('bi-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('bi-eye-slash');
+        toggleIcon.classList.add('bi-eye');
+      }
+    });
+  </script>
 </body>
 </html>

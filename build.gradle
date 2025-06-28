@@ -2,6 +2,10 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.0'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
+	id 'org.sonarqube' version '4.4.1.3373'
+	id 'com.github.spotbugs' version '6.0.7'
+	id 'checkstyle'
 }
 
 group = 'com.example'
@@ -28,6 +32,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -36,8 +41,86 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	
+	// TOTP（多要素認証）用
+	implementation 'dev.samstevens.totp:totp:1.7.1'
+	// QRコード生成用
+	implementation 'com.google.zxing:core:3.5.2'
+	implementation 'com.google.zxing:javase:3.5.2'
+	// メール送信用
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	// OAuth2.0クライアント
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	// PostgreSQL（本番環境用）
+	runtimeOnly 'org.postgresql:postgresql'
+	// ヘルスチェック用
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+// JaCoCoカバレッジレポート設定
+jacoco {
+	toolVersion = '0.8.11'
+}
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required = true
+		html.required = true
+		csv.required = false
+	}
+	
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+				'**/entity/**',
+				'**/dto/**',
+				'**/config/**',
+				'**/*Application.class'
+			])
+		}))
+	}
+}
+
+// カバレッジ基準の設定
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.70 // 70%のカバレッジを要求
+			}
+		}
+	}
+}
+
+// Checkstyle設定
+checkstyle {
+	toolVersion = '10.12.5'
+	configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+	ignoreFailures = true
+}
+
+// SpotBugs設定
+spotbugs {
+	ignoreFailures = true
+	excludeFilter = file("${rootDir}/config/spotbugs/exclude.xml")
+}
+
+// SonarQube設定
+sonarqube {
+	properties {
+		property "sonar.projectName", "LoginDemo"
+		property "sonar.projectVersion", version
+		property "sonar.sourceEncoding", "UTF-8"
+		property "sonar.sources", "src/main/java"
+		property "sonar.tests", "src/test/java"
+		property "sonar.java.binaries", "build/classes/java/main"
+		property "sonar.java.test.binaries", "build/classes/java/test"
+		property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
+	}
 }

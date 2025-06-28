@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('追加認証')}"></head>
+<body>
+  <nav th:replace="~{fragments/common :: navbar}"></nav>
+
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6">
+        <div class="card border-0 shadow">
+          <div class="card-body p-5">
+            <div class="text-center mb-4">
+              <div class="bg-warning bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                   style="width: 70px; height: 70px;">
+                <i class="bi bi-shield-exclamation text-white fs-2"></i>
+              </div>
+              <h1 class="h3 mb-1 fw-bold">追加認証が必要です</h1>
+              <p class="text-muted">アカウントの安全性を確保するため、追加の確認が必要です</p>
+            </div>
+            
+            <!-- リスク情報 -->
+            <div class="alert alert-warning" role="alert">
+              <h6 class="alert-heading mb-2">
+                <i class="bi bi-info-circle me-2"></i>検出されたリスク要因
+              </h6>
+              <ul class="mb-0 small" th:if="${session.riskAssessmentResult}">
+                <li th:each="factor : ${session.riskAssessmentResult.riskFactors}" th:text="${factor}"></li>
+              </ul>
+            </div>
+            
+            <!-- 認証方法の選択 -->
+            <div class="mb-4">
+              <h5 class="fw-semibold mb-3">認証方法を選択してください</h5>
+              
+              <!-- TOTP認証 -->
+              <div th:if="${session.riskAssessmentResult.recommendedVerificationMethods.contains('TOTP')}" 
+                   class="border rounded p-3 mb-3 verification-option" role="button" 
+                   onclick="selectVerificationMethod('totp')">
+                <div class="d-flex align-items-center">
+                  <div class="me-3">
+                    <i class="bi bi-phone fs-3 text-primary"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1">認証アプリ</h6>
+                    <p class="text-muted small mb-0">Google Authenticatorなどの認証アプリを使用</p>
+                  </div>
+                  <div>
+                    <i class="bi bi-chevron-right text-muted"></i>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- メールOTP -->
+              <div th:if="${session.riskAssessmentResult.recommendedVerificationMethods.contains('EMAIL_OTP')}" 
+                   class="border rounded p-3 mb-3 verification-option" role="button" 
+                   onclick="selectVerificationMethod('email')">
+                <div class="d-flex align-items-center">
+                  <div class="me-3">
+                    <i class="bi bi-envelope fs-3 text-primary"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1">メール認証</h6>
+                    <p class="text-muted small mb-0">登録されたメールアドレスに認証コードを送信</p>
+                  </div>
+                  <div>
+                    <i class="bi bi-chevron-right text-muted"></i>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- セキュリティ質問 -->
+              <div th:if="${session.riskAssessmentResult.recommendedVerificationMethods.contains('SECURITY_QUESTIONS')}" 
+                   class="border rounded p-3 mb-3 verification-option" role="button" 
+                   onclick="selectVerificationMethod('questions')">
+                <div class="d-flex align-items-center">
+                  <div class="me-3">
+                    <i class="bi bi-question-circle fs-3 text-primary"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1">セキュリティ質問</h6>
+                    <p class="text-muted small mb-0">事前に設定した質問に回答</p>
+                  </div>
+                  <div>
+                    <i class="bi bi-chevron-right text-muted"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 認証フォーム（動的に表示） -->
+            <div id="verificationForm" style="display: none;">
+              <!-- TOTP入力フォーム -->
+              <form id="totpForm" th:action="@{/auth/verify-additional}" method="post" style="display: none;">
+                <input type="hidden" name="verificationType" value="TOTP">
+                <div class="mb-3">
+                  <label for="totpCode" class="form-label">認証コード</label>
+                  <input type="text" class="form-control form-control-lg text-center" 
+                         id="totpCode" name="code" pattern="[0-9]{6}" maxlength="6" 
+                         placeholder="000000" required>
+                  <div class="form-text">認証アプリに表示されている6桁のコードを入力してください</div>
+                </div>
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-shield-check me-2"></i>認証
+                  </button>
+                </div>
+              </form>
+              
+              <!-- メールOTPフォーム -->
+              <form id="emailForm" th:action="@{/auth/send-email-otp}" method="post" style="display: none;">
+                <input type="hidden" name="verificationType" value="EMAIL_OTP">
+                <div class="alert alert-info">
+                  <i class="bi bi-info-circle me-2"></i>
+                  登録されたメールアドレスに認証コードを送信します
+                </div>
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-send me-2"></i>認証コードを送信
+                  </button>
+                </div>
+              </form>
+              
+              <!-- セキュリティ質問フォーム -->
+              <form id="questionsForm" th:action="@{/auth/verify-additional}" method="post" style="display: none;">
+                <input type="hidden" name="verificationType" value="SECURITY_QUESTIONS">
+                <div class="alert alert-info">
+                  <i class="bi bi-info-circle me-2"></i>
+                  この機能は準備中です
+                </div>
+              </form>
+              
+              <div class="mt-3">
+                <button type="button" class="btn btn-link" onclick="resetSelection()">
+                  <i class="bi bi-arrow-left me-2"></i>別の方法を選択
+                </button>
+              </div>
+            </div>
+            
+            <!-- このデバイスを信頼 -->
+            <div class="form-check mt-4">
+              <input class="form-check-input" type="checkbox" id="trustDevice" name="trustDevice">
+              <label class="form-check-label" for="trustDevice">
+                このデバイスを30日間信頼する
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div th:replace="~{fragments/common :: scripts}"></div>
+  <script>
+    // 認証方法を選択
+    function selectVerificationMethod(method) {
+      document.querySelectorAll('.verification-option').forEach(el => {
+        el.style.display = 'none';
+      });
+      document.getElementById('verificationForm').style.display = 'block';
+      
+      // すべてのフォームを非表示
+      document.getElementById('totpForm').style.display = 'none';
+      document.getElementById('emailForm').style.display = 'none';
+      document.getElementById('questionsForm').style.display = 'none';
+      
+      // 選択されたフォームを表示
+      if (method === 'totp') {
+        document.getElementById('totpForm').style.display = 'block';
+        document.getElementById('totpCode').focus();
+      } else if (method === 'email') {
+        document.getElementById('emailForm').style.display = 'block';
+      } else if (method === 'questions') {
+        document.getElementById('questionsForm').style.display = 'block';
+      }
+    }
+    
+    // 選択をリセット
+    function resetSelection() {
+      document.getElementById('verificationForm').style.display = 'none';
+      document.querySelectorAll('.verification-option').forEach(el => {
+        el.style.display = 'block';
+      });
+    }
+    
+    // 6桁の数字のみ入力可能にする
+    document.getElementById('totpCode')?.addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+    });
+  </script>
+  
+  <style>
+    .verification-option {
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .verification-option:hover {
+      background-color: var(--bs-light);
+      border-color: var(--bs-primary) !important;
+    }
+  </style>
+</body>
+</html>

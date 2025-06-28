@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('バックアップコード')}"></head>
+<body>
+  <nav th:replace="~{fragments/common :: navbar}"></nav>
+
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6">
+        <div class="card border-0 shadow">
+          <div class="card-body p-5">
+            <div class="text-center mb-4">
+              <div class="bg-success bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                   style="width: 70px; height: 70px;">
+                <i class="bi bi-check-lg text-white fs-1"></i>
+              </div>
+              <h1 class="h3 mb-1 fw-bold">
+                <span th:if="${regenerated}">バックアップコードを再生成しました</span>
+                <span th:unless="${regenerated}">二要素認証を有効化しました</span>
+              </h1>
+              <p class="text-muted">以下のバックアップコードを安全な場所に保管してください</p>
+            </div>
+            
+            <div class="alert alert-danger mb-4">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <strong>重要：</strong>
+              これらのコードは二度と表示されません。認証アプリにアクセスできなくなった場合の唯一の復旧手段です。
+            </div>
+            
+            <!-- バックアップコード -->
+            <div class="card bg-light border-0 mb-4">
+              <div class="card-body">
+                <h5 class="card-title mb-3">
+                  <i class="bi bi-key-fill me-2"></i>バックアップコード
+                </h5>
+                <div class="row g-2" id="backupCodes">
+                  <div class="col-6" th:each="code : ${backupCodes}">
+                    <div class="bg-white rounded p-2 text-center font-monospace">
+                      <span th:text="${code}"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- アクション -->
+            <div class="d-grid gap-2 mb-4">
+              <button type="button" class="btn btn-primary" onclick="downloadCodes()">
+                <i class="bi bi-download me-2"></i>テキストファイルでダウンロード
+              </button>
+              <button type="button" class="btn btn-outline-secondary" onclick="printCodes()">
+                <i class="bi bi-printer me-2"></i>印刷する
+              </button>
+              <button type="button" class="btn btn-outline-secondary" onclick="copyCodes()">
+                <i class="bi bi-clipboard me-2"></i>クリップボードにコピー
+              </button>
+            </div>
+            
+            <div class="alert alert-info mb-4">
+              <h6 class="alert-heading">
+                <i class="bi bi-info-circle me-2"></i>バックアップコードの使い方
+              </h6>
+              <ul class="mb-0 small">
+                <li>認証アプリにアクセスできない場合に使用します</li>
+                <li>各コードは1回のみ使用可能です</li>
+                <li>すべてのコードを使い切った場合は、新しいコードを生成してください</li>
+              </ul>
+            </div>
+            
+            <div class="text-center">
+              <a th:href="@{/mfa/manage}" class="btn btn-success">
+                <i class="bi bi-check-circle me-2"></i>設定完了
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div th:replace="~{fragments/common :: scripts}"></div>
+  <script th:inline="javascript">
+    const backupCodes = /*[[${backupCodes}]]*/ [];
+    
+    // テキストファイルでダウンロード
+    function downloadCodes() {
+      const content = `バックアップコード - Secure Login Demo
+生成日時: ${new Date().toLocaleString('ja-JP')}
+
+重要: これらのコードは安全な場所に保管してください。
+各コードは1回のみ使用可能です。
+
+バックアップコード:
+${backupCodes.map((code, index) => `${index + 1}. ${code}`).join('\n')}
+
+注意事項:
+- 認証アプリにアクセスできない場合に使用してください
+- 使用済みのコードは無効になります
+- すべてのコードを使い切った場合は新しいコードを生成してください`;
+      
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup-codes-${new Date().getTime()}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    
+    // 印刷
+    function printCodes() {
+      window.print();
+    }
+    
+    // クリップボードにコピー
+    function copyCodes() {
+      const codesText = backupCodes.join('\n');
+      navigator.clipboard.writeText(codesText).then(() => {
+        alert('バックアップコードをクリップボードにコピーしました');
+      });
+    }
+  </script>
+  
+  <!-- 印刷用スタイル -->
+  <style>
+    @media print {
+      .navbar, .btn, .alert-info { display: none !important; }
+      .alert-danger { color: black !important; background-color: #f8f9fa !important; }
+    }
+  </style>
+</body>
+</html>

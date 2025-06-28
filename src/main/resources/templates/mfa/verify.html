@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('二要素認証')}"></head>
+<body>
+  <div class="container d-flex align-items-center justify-content-center py-5" style="min-height: 100vh;">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+      <div class="card border-0 shadow-lg">
+        <div class="card-body p-5">
+          <!-- ロゴ・タイトル -->
+          <div class="text-center mb-4">
+            <div class="bg-warning bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                 style="width: 70px; height: 70px;">
+              <i class="bi bi-shield-lock-fill text-white fs-2"></i>
+            </div>
+            <h1 class="h3 mb-1 fw-bold">二要素認証</h1>
+            <p class="text-muted small">認証コードを入力してください</p>
+          </div>
+          
+          <!-- ユーザー情報 -->
+          <div class="text-center mb-4">
+            <div class="d-inline-flex align-items-center bg-light rounded-pill px-3 py-2">
+              <i class="bi bi-person-circle me-2"></i>
+              <span class="fw-semibold" th:text="${username}">username</span>
+            </div>
+          </div>
+          
+          <!-- エラーメッセージ -->
+          <div th:if="${error}" class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div th:text="${error}"></div>
+          </div>
+          
+          <!-- 認証フォーム -->
+          <form th:action="@{/mfa/verify}" method="post" id="verifyForm">
+            <input type="hidden" name="useBackupCode" id="useBackupCode" value="false">
+            
+            <!-- TOTPコード入力 -->
+            <div id="totpSection">
+              <div class="mb-4">
+                <label for="code" class="form-label fw-semibold">
+                  <i class="bi bi-phone me-1"></i>認証アプリのコード
+                </label>
+                <input type="text" class="form-control form-control-lg text-center" id="code" name="code" 
+                       pattern="[0-9]{6,8}" maxlength="8" placeholder="000000" 
+                       autocomplete="off" autofocus>
+                <div class="form-text">
+                  Google Authenticatorなどのアプリに表示されている6桁のコードを入力
+                </div>
+              </div>
+              
+              <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                  <i class="bi bi-check-circle me-2"></i>認証する
+                </button>
+              </div>
+              
+              <div class="text-center">
+                <button type="button" class="btn btn-link text-decoration-none" onclick="showBackupCodeSection()">
+                  <i class="bi bi-key me-1"></i>バックアップコードを使用
+                </button>
+              </div>
+            </div>
+            
+            <!-- バックアップコード入力（非表示） -->
+            <div id="backupCodeSection" style="display: none;">
+              <div class="mb-4">
+                <label for="backupCode" class="form-label fw-semibold">
+                  <i class="bi bi-key-fill me-1"></i>バックアップコード
+                </label>
+                <input type="text" class="form-control form-control-lg text-center" id="backupCode" 
+                       pattern="[0-9]{8}" maxlength="8" placeholder="00000000" 
+                       autocomplete="off">
+                <div class="form-text">
+                  初回設定時に保存した8桁のバックアップコードを入力
+                </div>
+              </div>
+              
+              <div class="alert alert-warning">
+                <i class="bi bi-info-circle me-1"></i>
+                バックアップコードは1回のみ使用可能です
+              </div>
+              
+              <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-warning btn-lg fw-semibold" onclick="submitBackupCode()">
+                  <i class="bi bi-check-circle me-2"></i>バックアップコードで認証
+                </button>
+              </div>
+              
+              <div class="text-center">
+                <button type="button" class="btn btn-link text-decoration-none" onclick="showTotpSection()">
+                  <i class="bi bi-phone me-1"></i>認証アプリのコードを使用
+                </button>
+              </div>
+            </div>
+          </form>
+          
+          <hr class="my-4">
+          
+          <!-- ヘルプ -->
+          <div class="text-center">
+            <p class="text-muted small mb-2">認証に問題がある場合は</p>
+            <a href="#" class="text-decoration-none small">
+              <i class="bi bi-question-circle me-1"></i>サポートに連絡
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- セキュリティ情報 -->
+      <div class="text-center mt-4">
+        <p class="text-muted small mb-0">
+          <i class="bi bi-shield-check me-1"></i>
+          このステップはアカウントの安全性を高めます
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <div th:replace="~{fragments/common :: scripts}"></div>
+  <script>
+    // セクション切り替え
+    function showBackupCodeSection() {
+      document.getElementById('totpSection').style.display = 'none';
+      document.getElementById('backupCodeSection').style.display = 'block';
+      document.getElementById('backupCode').focus();
+    }
+    
+    function showTotpSection() {
+      document.getElementById('backupCodeSection').style.display = 'none';
+      document.getElementById('totpSection').style.display = 'block';
+      document.getElementById('code').focus();
+    }
+    
+    // バックアップコード送信
+    function submitBackupCode() {
+      const backupCode = document.getElementById('backupCode').value;
+      document.getElementById('code').value = backupCode;
+      document.getElementById('useBackupCode').value = 'true';
+    }
+    
+    // 数字のみ入力可能にする
+    document.getElementById('code').addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
+    
+    document.getElementById('backupCode').addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
+    
+    // エンターキーで送信
+    document.getElementById('code').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && this.value.length >= 6) {
+        document.getElementById('verifyForm').submit();
+      }
+    });
+  </script>
+</body>
+</html>

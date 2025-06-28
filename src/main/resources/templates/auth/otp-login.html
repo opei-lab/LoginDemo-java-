@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('OTPログイン')}"></head>
+<body>
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-6 col-lg-5">
+        <div class="card border-0 shadow">
+          <div class="card-body p-5">
+            <div class="text-center mb-4">
+              <div class="bg-primary bg-gradient rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                   style="width: 70px; height: 70px;">
+                <i class="bi bi-envelope-open text-white fs-2"></i>
+              </div>
+              <h1 class="h3 mb-1 fw-bold">メールでログイン</h1>
+              <p class="text-muted">登録済みのメールアドレスにワンタイムパスワードを送信します</p>
+            </div>
+            
+            <!-- メッセージ -->
+            <div th:if="${error}" class="alert alert-danger d-flex align-items-center" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <div th:text="${error}"></div>
+            </div>
+            
+            <div th:if="${success}" class="alert alert-success d-flex align-items-center" role="alert">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              <div th:text="${success}"></div>
+            </div>
+            
+            <!-- ステップ1: メールアドレス入力 -->
+            <div th:if="${!otpSent}">
+              <form th:action="@{/auth/otp/send}" method="post">
+                <div class="mb-4">
+                  <label for="email" class="form-label fw-semibold">
+                    <i class="bi bi-envelope me-1"></i>登録メールアドレス
+                  </label>
+                  <input type="email" class="form-control form-control-lg" id="email" name="email" 
+                         placeholder="example@email.com" required autofocus>
+                  <div class="form-text">アカウント登録時に使用したメールアドレスを入力してください</div>
+                </div>
+                
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-send me-2"></i>認証コードを送信
+                  </button>
+                </div>
+              </form>
+            </div>
+            
+            <!-- ステップ2: OTP入力 -->
+            <div th:if="${otpSent}">
+              <div class="alert alert-info mb-4">
+                <i class="bi bi-info-circle me-2"></i>
+                <span th:text="${maskedEmail}"></span> に認証コードを送信しました
+              </div>
+              
+              <form th:action="@{/auth/otp/verify}" method="post">
+                <input type="hidden" name="email" th:value="${email}">
+                
+                <div class="mb-4">
+                  <label for="otpCode" class="form-label fw-semibold">
+                    <i class="bi bi-key me-1"></i>認証コード
+                  </label>
+                  <input type="text" class="form-control form-control-lg text-center" 
+                         id="otpCode" name="code" pattern="[0-9]{6}" maxlength="6" 
+                         placeholder="000000" required autofocus>
+                  <div class="form-text">メールで受信した6桁のコードを入力してください</div>
+                </div>
+                
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-shield-check me-2"></i>ログイン
+                  </button>
+                </div>
+              </form>
+              
+              <!-- 再送信 -->
+              <div class="text-center mt-4">
+                <p class="text-muted small mb-2">コードが届かない場合</p>
+                <form th:action="@{/auth/otp/resend}" method="post" class="d-inline">
+                  <input type="hidden" name="email" th:value="${email}">
+                  <button type="submit" class="btn btn-link">
+                    <i class="bi bi-arrow-clockwise me-1"></i>再送信
+                  </button>
+                </form>
+              </div>
+            </div>
+            
+            <!-- 通常のログインに戻る -->
+            <hr class="my-4">
+            <div class="text-center">
+              <a th:href="@{/login}" class="text-decoration-none">
+                <i class="bi bi-arrow-left me-1"></i>通常のログインに戻る
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <!-- ヘルプ情報 -->
+        <div class="alert alert-info mt-4">
+          <h6 class="alert-heading">
+            <i class="bi bi-info-circle me-2"></i>OTPログインについて
+          </h6>
+          <ul class="mb-0 small">
+            <li>パスワードを忘れた場合の代替ログイン方法です</li>
+            <li>認証コードは5分間有効です</li>
+            <li>登録済みのメールアドレスにのみ送信されます</li>
+            <li>迷惑メールフォルダもご確認ください</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div th:replace="~{fragments/common :: scripts}"></div>
+  <script>
+    // 6桁の数字のみ入力可能にする
+    document.getElementById('otpCode')?.addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+    });
+  </script>
+</body>
+</html>
