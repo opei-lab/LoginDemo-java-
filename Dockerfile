@@ -2,7 +2,7 @@
 FROM gradle:8.14-jdk17 AS build
 WORKDIR /app
 COPY . .
-RUN gradle build -x test
+RUN gradle bootJar --no-daemon
 
 # 実行ステージ
 FROM openjdk:17-jdk-slim
