@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- SpotBugs除外設定 -->
+    <!-- 必要に応じて除外ルールを追加 -->
+    
+    <!-- 例: 特定のクラスを除外 -->
+    <!-- <Match>
+        <Class name="com.example.demo.config.SecurityConfig" />
+    </Match> -->
+    
+    <!-- 例: 特定のバグパターンを除外 -->
+    <!-- <Match>
+        <Bug pattern="DM_EXIT" />
+    </Match> -->
+</FindBugsFilter>

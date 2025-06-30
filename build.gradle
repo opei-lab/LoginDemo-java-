@@ -122,5 +122,7 @@ sonarqube {
 		property "sonar.java.binaries", "build/classes/java/main"
 		property "sonar.java.test.binaries", "build/classes/java/test"
 		property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
+		// 非推奨警告を解決
+		property "sonar.gradle.skipCompile", "true"
 	}
 }

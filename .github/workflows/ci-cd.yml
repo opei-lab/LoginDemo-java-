@@ -26,7 +26,7 @@ jobs:
       run: ./gradlew test
     
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew bootJar
     
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
