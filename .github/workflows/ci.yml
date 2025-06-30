@@ -49,7 +49,7 @@ jobs:
       run: ./gradlew bootJar
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: jar-artifact
         path: build/libs/*.jar
@@ -121,7 +121,7 @@ jobs:
         format: 'HTML'
 
     - name: Upload OWASP results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dependency-check-report
         path: reports/
