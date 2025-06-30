@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -37,10 +37,10 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Download artifacts
       uses: actions/download-artifact@v4
@@ -48,10 +48,26 @@ jobs:
         name: jar-artifact
         path: build/libs/
     
-    # Railway へのデプロイ（環境変数の設定が必要）
+    # デプロイステップ（Railway tokenが設定されている場合のみ実行）
+    - name: Check deployment readiness
+      id: check-deploy
+      run: |
+        if [ -n "${{ secrets.RAILWAY_TOKEN }}" ]; then
+          echo "deploy=true" >> $GITHUB_OUTPUT
+        else
+          echo "deploy=false" >> $GITHUB_OUTPUT
+          echo "⚠️ RAILWAY_TOKEN is not set. Skipping deployment."
+        fi
+    
     - name: Deploy to Railway
+      if: steps.check-deploy.outputs.deploy == 'true'
       env:
         RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       run: |
         npm install -g @railway/cli
         railway up
+    
+    # 代替デプロイオプション（将来的な実装用）
+    # - name: Deploy to AWS
+    #   if: steps.check-deploy.outputs.deploy == 'false'
+    #   run: echo "Alternative deployment methods can be configured here"
